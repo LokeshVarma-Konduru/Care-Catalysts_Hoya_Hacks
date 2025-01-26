@@ -1,0 +1,30 @@
+# Node.js dependencies
+hospital-backend/node_modules/
+hospital-dashboard/node_modules/
+
+# Environment variables
+hospital-backend/.env
+hospital-dashboard/.env
+ML-Models/.env
+
+# Build files
+hospital-dashboard/dist/
+hospital-backend/build/
+
+# Logs
+*.log
+hospital-backend/logs/
+hospital-dashboard/logs/
+
+# System files
+.DS_Store               # macOS
+Thumbs.db               # Windows
+
+# IDE and editor specific files
+.vscode/                # VS Code
+.idea/                  # JetBrains IDEs
+*.swp                   # Vim swap files
+
+# ML models csv files
+ML-Models/Fraudulent_E-Commerce_Transaction_Data.csv
+ML-Models/Fraudulent_E-Commerce_Transaction_Data_2.csv
