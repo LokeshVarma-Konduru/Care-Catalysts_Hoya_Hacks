@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -11,8 +11,10 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Grid
+  Grid,
+  Container
 } from '@mui/material';
+import { Send as SendIcon } from '@mui/icons-material';
 import axios from 'axios';
 
 const FeedbackForm = () => {
@@ -52,7 +54,6 @@ const FeedbackForm = () => {
     setSuccess('');
 
     try {
-      // Validate form data
       if (!formData.Patient_Name || !formData.Age || !formData.Sex || !formData.Ethnicity) {
         throw new Error('Please fill in all required fields');
       }
@@ -76,17 +77,70 @@ const FeedbackForm = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h5" gutterBottom align="center" color="primary">
+    <Box 
+      sx={{ 
+        maxWidth: 800,
+        mx: 'auto',
+        mt: 2,
+        p: { xs: 2, sm: 3 }
+      }}
+    >
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: { xs: 3, sm: 4 },
+          borderRadius: 2,
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Typography 
+          variant="h5" 
+          gutterBottom 
+          align="center" 
+          color="primary"
+          sx={{ 
+            mb: 1,
+            fontWeight: 600,
+          }}
+        >
           Patient Feedback Form
         </Typography>
-        <Typography variant="body2" gutterBottom align="center" sx={{ mb: 4 }}>
+        
+        <Typography 
+          variant="body1" 
+          gutterBottom 
+          align="center" 
+          color="text.secondary"
+          sx={{ mb: 4 }}
+        >
           Help us improve our services by sharing your experience
         </Typography>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3,
+              borderRadius: 1,
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+        
+        {success && (
+          <Alert 
+            severity="success" 
+            sx={{ 
+              mb: 3,
+              borderRadius: 1,
+            }}
+          >
+            {success}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
@@ -98,8 +152,15 @@ const FeedbackForm = () => {
                 value={formData.Patient_Name}
                 onChange={handleChange}
                 required
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
               />
             </Grid>
+            
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -109,10 +170,25 @@ const FeedbackForm = () => {
                 value={formData.Age}
                 onChange={handleChange}
                 required
+                variant="outlined"
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
               />
             </Grid>
+
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
+              <FormControl 
+                fullWidth 
+                required
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
+              >
                 <InputLabel>Sex</InputLabel>
                 <Select
                   name="Sex"
@@ -120,14 +196,25 @@ const FeedbackForm = () => {
                   onChange={handleChange}
                   label="Sex"
                 >
-                  {options.sex.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {options.sex.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
+              <FormControl 
+                fullWidth 
+                required
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
+              >
                 <InputLabel>Ethnicity</InputLabel>
                 <Select
                   name="Ethnicity"
@@ -135,14 +222,24 @@ const FeedbackForm = () => {
                   onChange={handleChange}
                   label="Ethnicity"
                 >
-                  {options.ethnicity.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {options.ethnicity.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
+              <FormControl 
+                fullWidth
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
+              >
                 <InputLabel>Category</InputLabel>
                 <Select
                   name="Category"
@@ -150,14 +247,24 @@ const FeedbackForm = () => {
                   onChange={handleChange}
                   label="Category"
                 >
-                  {options.category.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {options.category.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
+              <FormControl 
+                fullWidth
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                  }
+                }}
+              >
                 <InputLabel>Subcategory</InputLabel>
                 <Select
                   name="Subcategory"
@@ -165,12 +272,15 @@ const FeedbackForm = () => {
                   onChange={handleChange}
                   label="Subcategory"
                 >
-                  {options.subcategory.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {options.subcategory.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                 <Button
@@ -179,9 +289,13 @@ const FeedbackForm = () => {
                   color="primary"
                   size="large"
                   disabled={loading}
-                  sx={{ minWidth: 200 }}
+                  endIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
+                  sx={{
+                    minWidth: 200,
+                    py: 1.5,
+                  }}
                 >
-                  {loading ? <CircularProgress size={24} /> : 'Submit Feedback'}
+                  {loading ? 'Submitting...' : 'Submit Feedback'}
                 </Button>
               </Box>
             </Grid>
