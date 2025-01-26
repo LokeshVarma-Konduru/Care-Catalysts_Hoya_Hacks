@@ -61,11 +61,11 @@ const EventTrends = () => {
           {
             label: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Events (${selectedFilter})`,
             data: sortedData.map((item) => item.avgCount),
-            backgroundColor: 'rgba(33, 150, 243, 0.2)',
+            backgroundColor: 'rgba(33, 150, 243, 1)',
             borderColor: 'rgba(33, 150, 243, 1)',
             borderWidth: 2,
-            tension: 0.4,
-            fill: true,
+            tension: 0,
+            fill: false,
             pointBackgroundColor: 'rgba(33, 150, 243, 1)',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
@@ -106,7 +106,7 @@ const EventTrends = () => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         callbacks: {
           label: function(context) {
-            return `Average events: ${context.parsed.y.toFixed(2)}`;
+            return `Events: ${context.parsed.y.toFixed(2)}`;
           }
         }
       }
@@ -114,19 +114,31 @@ const EventTrends = () => {
     scales: {
       x: {
         grid: {
-          color: '#f0f0f0'
+          display: false
         },
         ticks: {
           color: '#666'
         }
       },
       y: {
-        beginAtZero: true,
+        beginAtZero: false,
         grid: {
-          color: '#f0f0f0'
+          color: '#f0f0f0',
+          drawBorder: false
         },
         ticks: {
-          color: '#666'
+          color: '#666',
+          padding: 10
+        },
+        suggestedMin: function(context) {
+          const values = context.chart.data.datasets[0].data;
+          const min = Math.min(...values);
+          return min - (min * 0.1);
+        },
+        suggestedMax: function(context) {
+          const values = context.chart.data.datasets[0].data;
+          const max = Math.max(...values);
+          return max + (max * 0.1);
         }
       }
     },
@@ -134,6 +146,11 @@ const EventTrends = () => {
     interaction: {
       intersect: false,
       mode: 'index'
+    },
+    elements: {
+      line: {
+        borderJoinStyle: 'miter'
+      }
     }
   };
 

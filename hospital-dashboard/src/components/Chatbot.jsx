@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Paper, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import ElderlyVisitsChart from './ElderlyVisitsChart';
+import PregnantVisitsChart from './PregnantVisitsChart';
 
 const Chatbot = ({ onGraphSelect }) => {
   const [messages, setMessages] = useState([
@@ -8,17 +10,73 @@ const Chatbot = ({ onGraphSelect }) => {
       text: "Hello! I can help you explore hospital data. Choose a category to begin:",
       isBot: true,
       options: [
-        { text: "Epic Data", value: "epic" },
-        { text: "Patient Feedback Data", value: "feedback" },
-        { text: "Ask Medical Questions", value: "medical" }  
+        { text: "Progress", value: "progress" },
+        { text: "Submit Feedback", value: "feedback_form" },
+        { text: "Ask Medical Questions", value: "medical" },
+        { text: "Results", value: "results" },
+        { text: "Start Analysis", value: "start_analysis" }
       ]
     }
   ]);
   const [input, setInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAnalysis, setSelectedAnalysis] = useState(false);
+
+  const analysisOptions = [
+    { text: "Epic Data", value: "epic" },
+    { text: "Patient Feedback Data", value: "feedback" },
+    { text: "Epic + Feedback Analysis", value: "epic_feedback" }
+  ];
+
+  const resultOptions = [
+    { text: "Implementation Impact Analysis", value: "final_results" },
+    { text: "Show Feedback Impact Analysis", value: "feedback_impact" },
+    { text: "Show Sentiment Analysis", value: "sentiment_analysis" }
+  ];
 
   const handleOptionClick = async (value) => {
+    if (value === "start_analysis") {
+      setSelectedAnalysis(true);
+      setMessages([
+        ...messages,
+        {
+          text: "Please select the type of analysis you would like to perform:",
+          isBot: true,
+          options: analysisOptions
+        }
+      ]);
+      return;
+    }
+
+    if (value === "results") {
+      setMessages([
+        ...messages,
+        { text: "Results", isBot: false },
+        {
+          text: "What would you like to see?",
+          isBot: true,
+          options: resultOptions
+        }
+      ]);
+      return;
+    }
+
+    if (value === "epic_feedback") {
+      setMessages([
+        ...messages,
+        {
+          text: "Choose an analysis type:",
+          isBot: true,
+          options: [
+            { text: "Show Admission Issues Analysis", value: "admission_issues" },
+            { text: "Show Admission vs Subcategory Analysis", value: "admission_subcategories" },
+          ]
+        }
+      ]);
+      return;
+    }
+
     if (value === 'epic') {
       setMessages([
         ...messages,
@@ -57,7 +115,34 @@ const Chatbot = ({ onGraphSelect }) => {
         }
       ]);
       setSelectedCategory('medical');
-    } else if (['event_trends', 'feedback_categories', 'ethnicity_distribution', 'age_distribution'].includes(value)) {
+    } else if (value === 'feedback_form') {
+      setMessages([
+        ...messages,
+        { text: "Opening feedback form...", isBot: false }
+      ]);
+      onGraphSelect('feedback_form');
+    } else if (value === 'sentiment_analysis') {
+      setMessages([
+        ...messages,
+        { text: "Showing Sentiment Analysis Results", isBot: false },
+        {
+          text: "Here's the sentiment analysis comparison before and after implementation:",
+          isBot: true
+        }
+      ]);
+      onGraphSelect('sentiment_analysis');
+      return;
+    } else if (value === 'final_results') {
+      setMessages([
+        ...messages,
+        { text: "Implementation Impact Analysis", isBot: false },
+        {
+          text: "Here's the implementation impact analysis across different categories:",
+          isBot: true
+        }
+      ]);
+      onGraphSelect('final_results');
+    } else if (['event_trends', 'feedback_categories', 'ethnicity_distribution', 'age_distribution', 'admission_issues', 'admission_subcategories', 'feedback_impact'].includes(value)) {
       setMessages([
         ...messages,
         { 
@@ -66,6 +151,39 @@ const Chatbot = ({ onGraphSelect }) => {
         }
       ]);
       onGraphSelect(value);
+    } else if (value === 'progress') {
+      setMessages([
+        ...messages,
+        { text: "Progress", isBot: false },
+        {
+          text: "Please select which analysis you would like to see:",
+          isBot: true,
+          options: [
+            { text: "Elderly Visits Analysis", value: "elderly_visits" },
+            { text: "Pregnant Visit Analysis", value: "pregnant_visits" }
+          ]
+        }
+      ]);
+    } else if (value === 'elderly_visits') {
+      setMessages([
+        ...messages,
+        { text: "Elderly Visits Analysis", isBot: false },
+        {
+          text: "Here's the elderly visits analysis:",
+          isBot: true
+        }
+      ]);
+      onGraphSelect('elderly_visits');
+    } else if (value === 'pregnant_visits') {
+      setMessages([
+        ...messages,
+        { text: "Pregnant Visit Analysis", isBot: false },
+        {
+          text: "Here's the pregnant visits analysis:",
+          isBot: true
+        }
+      ]);
+      onGraphSelect('pregnant_visits');
     }
   };
 
@@ -157,10 +275,64 @@ const Chatbot = ({ onGraphSelect }) => {
                     { text: data.answer, isBot: true }
                 ]);
             }
+            // Admission Issues Graph
+            else if (lowerMessage.includes('admission') && !lowerMessage.includes('subcategory')) {
+                graphType = 'admission_issues';
+                onGraphSelect(graphType);
+                const response = await fetch('http://localhost:5000/api/chat/rag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        question: "Explain the insights from admission issues analysis" 
+                    }),
+                });
+                const data = await response.json();
+                setMessages(prev => [
+                    ...prev,
+                    { text: "Navigating to Admission Issues analysis...", isBot: true },
+                    { text: data.answer, isBot: true }
+                ]);
+            }
+            // Admission vs Subcategory Graph
+            else if (lowerMessage.includes('admission') && lowerMessage.includes('subcategory')) {
+                graphType = 'admission_subcategories';
+                onGraphSelect(graphType);
+                const response = await fetch('http://localhost:5000/api/chat/rag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        question: "Explain the insights from admission vs subcategory analysis" 
+                    }),
+                });
+                const data = await response.json();
+                setMessages(prev => [
+                    ...prev,
+                    { text: "Navigating to Admission vs Subcategory analysis...", isBot: true },
+                    { text: data.answer, isBot: true }
+                ]);
+            }
+            // Feedback Impact Analysis
+            else if (lowerMessage.includes('feedback') && lowerMessage.includes('impact')) {
+                graphType = 'feedback_impact';
+                onGraphSelect(graphType);
+                const response = await fetch('http://localhost:5000/api/chat/rag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        question: "Explain the insights from feedback impact analysis" 
+                    }),
+                });
+                const data = await response.json();
+                setMessages(prev => [
+                    ...prev,
+                    { text: "Navigating to Feedback Impact analysis...", isBot: true },
+                    { text: data.answer, isBot: true }
+                ]);
+            }
             
             if (!graphType) {
                 setMessages(prev => [...prev, {
-                    text: "I'm not sure which graph you want to see. You can ask for:\n- Subcategory vs Ethnicity graph\n- Age Distribution graph\n- Event Trends graph\n- Feedback Categories graph",
+                    text: "I'm not sure which graph you want to see. You can ask for:\n- Subcategory vs Ethnicity graph\n- Age Distribution graph\n- Event Trends graph\n- Feedback Categories graph\n- Admission Issues analysis\n- Admission vs Subcategory analysis\n- Feedback Impact analysis",
                     isBot: true
                 }]);
             }
