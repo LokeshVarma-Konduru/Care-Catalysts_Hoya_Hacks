@@ -79,115 +79,93 @@ const Chatbot = ({ onGraphSelect }) => {
 
     setIsLoading(true);
     try {
-        // Check for navigation commands
-        const lowerMessage = userMessage.toLowerCase();
-        
-        if (lowerMessage.includes('show') || lowerMessage.includes('navigate')) {
-            let graphType = null;
-            
-            // Subcategory vs Ethnicity Graph
-            if (lowerMessage.includes('ethnicity') || lowerMessage.includes('subcategory vs ethnicity')) {
-                graphType = 'ethnicity_distribution';
-                onGraphSelect(graphType);
-                const response = await fetch('http://localhost:5000/api/chat/rag', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        question: "Explain the insights from subcategory vs ethnicity graph" 
-                    }),
-                });
-                const data = await response.json();
-                setMessages(prev => [
-                    ...prev,
-                    { text: "Navigating to Subcategory vs Ethnicity graph...", isBot: true },
-                    { text: data.answer, isBot: true }
-                ]);
-            }
-            // Age Distribution Graph
-            else if (lowerMessage.includes('age') || lowerMessage.includes('age distribution')) {
-                graphType = 'age_distribution';
-                onGraphSelect(graphType);
-                const response = await fetch('http://localhost:5000/api/chat/rag', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        question: "Explain the insights from age distribution graph" 
-                    }),
-                });
-                const data = await response.json();
-                setMessages(prev => [
-                    ...prev,
-                    { text: "Navigating to Age Distribution graph...", isBot: true },
-                    { text: data.answer, isBot: true }
-                ]);
-            }
-            // Event Trends Graph
-            else if (lowerMessage.includes('event') || lowerMessage.includes('trends')) {
-                graphType = 'event_trends';
-                onGraphSelect(graphType);
-                const response = await fetch('http://localhost:5000/api/chat/rag', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        question: "Explain the insights from event trends graph" 
-                    }),
-                });
-                const data = await response.json();
-                setMessages(prev => [
-                    ...prev,
-                    { text: "Navigating to Event Trends graph...", isBot: true },
-                    { text: data.answer, isBot: true }
-                ]);
-            }
-            // Feedback Categories Graph
-            else if (lowerMessage.includes('feedback')) {
-                graphType = 'feedback_categories';
-                onGraphSelect(graphType);
-                const response = await fetch('http://localhost:5000/api/chat/rag', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        question: "Explain the insights from feedback categories graph" 
-                    }),
-                });
-                const data = await response.json();
-                setMessages(prev => [
-                    ...prev,
-                    { text: "Navigating to Feedback Categories graph...", isBot: true },
-                    { text: data.answer, isBot: true }
-                ]);
-            }
-            
-            if (!graphType) {
-                setMessages(prev => [...prev, {
-                    text: "I'm not sure which graph you want to see. You can ask for:\n- Subcategory vs Ethnicity graph\n- Age Distribution graph\n- Event Trends graph\n- Feedback Categories graph",
-                    isBot: true
-                }]);
-            }
-        } else {
-            // Regular RAG query for insights or other questions
-            const response = await fetch('http://localhost:5000/api/chat/rag', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ question: userMessage }),
-            });
+      // Check for navigation commands
+      const lowerMessage = userMessage.toLowerCase();
+      
+      // Helper function to check for term variations
+      const containsAny = (text, terms) => terms.some(term => text.includes(term));
+      
+      // Define term variations for each graph type
+      const ethnicityTerms = ['ethnicity', 'ethnic', 'race', 'racial', 'cultural', 'subcategory vs ethnicity', 'ethnicity vs subcategory'];
+      const ageTerms = ['age', 'years', 'elderly', 'young', 'senior', 'age distribution', 'age group'];
+      const eventTerms = ['event', 'admission', 'discharge', 'hospital pattern', 'trend', 'epic', 'temporal'];
+      const feedbackTerms = ['feedback', 'complaint', 'response', 'patient feedback', 'category', 'issue'];
 
-            const data = await response.json();
-            setMessages(prev => [...prev, {
-                text: data.answer,
-                isBot: true
-            }]);
+      if (lowerMessage.includes('show') || lowerMessage.includes('navigate') || lowerMessage.includes('display') || lowerMessage.includes('view')) {
+        let graphType = null;
+        let graphDescription = '';
+        
+        // Subcategory vs Ethnicity Graph
+        if (containsAny(lowerMessage, ethnicityTerms)) {
+          graphType = 'ethnicity_distribution';
+          graphDescription = 'Subcategory vs Ethnicity';
         }
-    } catch (error) {
-        console.error('Error:', error);
-        setMessages(prev => [...prev, {
-            text: "I'm sorry, I encountered an error processing your request.",
+        // Age Distribution Graph
+        else if (containsAny(lowerMessage, ageTerms)) {
+          graphType = 'age_distribution';
+          graphDescription = 'Age Distribution';
+        }
+        // Event Trends Graph
+        else if (containsAny(lowerMessage, eventTerms)) {
+          graphType = 'event_trends';
+          graphDescription = 'Event Trends';
+        }
+        // Feedback Categories Graph
+        else if (containsAny(lowerMessage, feedbackTerms)) {
+          graphType = 'feedback_categories';
+          graphDescription = 'Feedback Categories';
+        }
+        
+        if (graphType) {
+          onGraphSelect(graphType);
+          const response = await fetch('http://localhost:5000/api/chat/rag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              question: `Explain the insights from ${graphDescription} graph` 
+            }),
+          });
+          const data = await response.json();
+          setMessages(prev => [
+            ...prev,
+            { text: `Navigating to ${graphDescription} graph...`, isBot: true },
+            { text: data.answer, isBot: true }
+          ]);
+        } else {
+          setMessages(prev => [...prev, {
+            text: "I can help you view these graphs:\n" +
+                  "1. Subcategory vs Ethnicity graph (shows distribution across ethnic groups)\n" +
+                  "2. Age Distribution graph (shows patterns across age groups)\n" +
+                  "3. Event Trends graph (shows hospital event patterns)\n" +
+                  "4. Feedback Categories graph (shows feedback distribution)\n\n" +
+                  "Try saying 'show [graph name]' or 'navigate to [graph name]'",
             isBot: true
+          }]);
+        }
+      } else {
+        // Regular RAG query for insights or other questions
+        const response = await fetch('http://localhost:5000/api/chat/rag', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ question: userMessage }),
+        });
+
+        const data = await response.json();
+        setMessages(prev => [...prev, {
+          text: data.answer,
+          isBot: true
         }]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages(prev => [...prev, {
+        text: "I'm sorry, I encountered an error processing your request.",
+        isBot: true
+      }]);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

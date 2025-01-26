@@ -37,24 +37,49 @@ async function queryRAG(question) {
     }
 
     try {
-        // Get relevant documents from vector store
-        const relevantDocs = await vectorStore.similaritySearch(question, 3);
+        // Normalize the question to handle variations
+        const normalizedQuestion = normalizeQuery(question);
+
+        // Get relevant documents from vector store with increased count for better context
+        const relevantDocs = await vectorStore.similaritySearch(normalizedQuestion, 5);
         const context = relevantDocs.map(doc => doc.pageContent).join('\n');
 
-        // Enhanced prompt for graph insights
+        // Enhanced prompt for more robust responses
         const prompt = `
-You are an expert healthcare data analyst. Based on the following context and question, provide detailed insights about the healthcare data visualization. If the question is about a specific graph:
-1. Explain what the graph shows
-2. Highlight key patterns and trends
-3. Provide actionable insights for healthcare improvement
-4. Compare different demographic groups if relevant
-5. Suggest potential interventions based on the data
+You are an expert healthcare data analyst with deep knowledge of medical data visualization. Based on the following context and question, provide a comprehensive analysis. Follow these guidelines:
+
+1. Question Understanding:
+   - Identify the main focus of the question (e.g., ethnicity, age, trends, patterns)
+   - Consider alternative terms or phrasings that mean the same thing
+   - Look for specific demographic or category mentions
+
+2. Data Visualization Analysis:
+   - Explain what the relevant graphs or charts show
+   - Describe key variables and their relationships
+   - Point out important patterns and trends
+   - Compare different groups or categories if relevant
+
+3. Healthcare Insights:
+   - Highlight significant findings and their implications
+   - Identify potential healthcare delivery improvements
+   - Suggest interventions based on the data
+   - Connect patterns to practical healthcare outcomes
+
+4. Response Structure:
+   - Start with a clear, direct answer
+   - Provide specific examples from the data
+   - Include relevant statistics or numbers if available
+   - End with actionable recommendations
 
 Context: ${context}
 
-Question: ${question}
+Question: ${normalizedQuestion}
 
-Remember to be specific about the data patterns and their implications for healthcare delivery. If the context doesn't contain relevant information, say so.`;
+Remember to:
+- Be specific about data patterns and their healthcare implications
+- Acknowledge if certain information isn't available in the context
+- Maintain consistency in terminology
+- Focus on practical, actionable insights`;
 
         // Generate response using Gemini
         const result = await model.generateContent(prompt);
@@ -64,6 +89,63 @@ Remember to be specific about the data patterns and their implications for healt
         console.error('Error in queryRAG:', error);
         throw error;
     }
+}
+
+// Helper function to normalize queries
+function normalizeQuery(query) {
+    const normalizations = {
+        // Ethnicity-related terms
+        'race': 'ethnicity',
+        'cultural background': 'ethnicity',
+        'ethnic group': 'ethnicity',
+        'racial': 'ethnic',
+        
+        // Age-related terms
+        'years': 'age',
+        'elderly': 'age group',
+        'young': 'age group',
+        'senior': 'age group',
+        
+        // Category-related terms
+        'problems': 'issues',
+        'challenges': 'issues',
+        'difficulties': 'issues',
+        'concerns': 'issues',
+        
+        // Distribution-related terms
+        'spread': 'distribution',
+        'breakdown': 'distribution',
+        'analysis': 'distribution',
+        
+        // Time-related terms
+        'temporal': 'time',
+        'periodic': 'time',
+        'timing': 'time',
+        
+        // Trend-related terms
+        'pattern': 'trend',
+        'variation': 'trend',
+        'change': 'trend',
+        
+        // Feedback-related terms
+        'complaints': 'feedback',
+        'responses': 'feedback',
+        'comments': 'feedback',
+        
+        // Event-related terms
+        'occurrences': 'events',
+        'incidents': 'events',
+        'cases': 'events'
+    };
+
+    let normalizedQuery = query.toLowerCase();
+    
+    // Replace variations with standardized terms
+    Object.entries(normalizations).forEach(([variant, standard]) => {
+        normalizedQuery = normalizedQuery.replace(new RegExp(variant, 'gi'), standard);
+    });
+
+    return normalizedQuery;
 }
 
 module.exports = { initializeVectorStore, queryRAG };

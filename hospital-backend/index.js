@@ -20,101 +20,139 @@ const medicalKnowledge = `
     
     1. Available Graphs and Navigation:
 
-    a) Subcategory vs Ethnicity Chart (Path: /subcategory-ethnicity):
-    - Shows distribution of healthcare issues across different ethnic groups
-    - Interactive filters for gender selection
-    - Color-coded bars for easy comparison
-    - Features:
-        * X-axis: Healthcare subcategories
+    a) Subcategory vs Ethnicity Analysis (Paths: /subcategory-ethnicity, /ethnicity-subcategory, /ethnic-distribution):
+    - Visualization Type: Bar chart comparing healthcare issues across ethnic groups
+    - Alternative Names: 
+        * Ethnicity Distribution Graph
+        * Ethnic Group Analysis
+        * Race vs Healthcare Issues
+        * Cultural Background Analysis
+    - Key Variables:
+        * X-axis: Healthcare subcategories (Communication Barriers, Delayed Diagnosis, Transport Issues, etc.)
         * Y-axis: Number of cases
-        * Multiple ethnic groups displayed side by side
-        * Filterable by gender (All, Male, Female)
-    - Navigation: "Show me the subcategory vs ethnicity graph" or "Navigate to ethnicity distribution"
+        * Grouping: By ethnic groups (Asian, Black, White, Hispanic, Other)
+    - Common Query Terms:
+        * "ethnicity", "ethnic", "race", "cultural background"
+        * "subcategory", "sub-category", "issues", "problems"
+        * "distribution", "breakdown", "analysis", "comparison"
     
-    b) Age vs Subcategory Chart (Path: /age-subcategory):
-    - Visualizes healthcare issues across different age groups
-    - Interactive subcategory selection
-    - Age groups in ranges (18-30, 31-45, 46-60, 61+)
-    - Features:
-        * X-axis: Age groups
+    b) Age Group Analysis (Paths: /age-subcategory, /age-distribution, /age-analysis):
+    - Visualization Type: Bar chart showing healthcare issues by age groups
+    - Alternative Names:
+        * Age Distribution Graph
+        * Age Group Breakdown
+        * Age-based Analysis
+        * Patient Age Statistics
+    - Key Variables:
+        * X-axis: Age groups (18-30, 31-45, 46-60, 61+)
         * Y-axis: Number of cases
-        * Color-coded bars for different subcategories
-        * Filterable by specific subcategory
-    - Navigation: "Show me the age distribution graph" or "Navigate to age analysis"
+        * Categories: All healthcare subcategories
+    - Common Query Terms:
+        * "age", "years", "elderly", "young"
+        * "group", "bracket", "range"
+        * "distribution", "spread", "pattern"
     
-    c) Feedback Analysis Dashboard (Path: /feedback):
-    - Overall distribution of feedback categories
-    - Ethnicity-specific analysis
-    - Trend analysis over time
-    - Features:
+    c) Feedback Analysis (Paths: /feedback, /feedback-analysis, /patient-feedback):
+    - Visualization Type: Multi-chart dashboard with pie and trend charts
+    - Alternative Names:
+        * Patient Feedback Dashboard
+        * Complaint Analysis
+        * Patient Response Analysis
+        * Healthcare Feedback Metrics
+    - Key Components:
         * Category distribution pie chart
         * Time-series trend analysis
-        * Ethnicity-wise breakdown
-    - Navigation: "Show me the feedback analysis" or "Open feedback dashboard"
+        * Demographic breakdown
+    - Common Query Terms:
+        * "feedback", "complaints", "responses", "issues"
+        * "trends", "patterns", "changes"
+        * "categories", "types", "classifications"
     
-    d) Event Trends Chart (Path: /events):
-    - Hospital event patterns and timing analysis
-    - Hourly and daily trend visualization
-    - Features:
-        * Time-based event distribution
-        * Peak hours identification
-        * Weekly patterns
-        * Admission and discharge trends
-    - Navigation: "Show me hospital event trends" or "View event analysis"
+    d) Event Trends (Paths: /events, /event-trends, /hospital-events):
+    - Visualization Type: Line chart showing temporal patterns
+    - Alternative Names:
+        * Hospital Event Analysis
+        * Temporal Event Patterns
+        * Time-based Event Analysis
+        * Operational Trends
+    - Key Variables:
+        * X-axis: Time periods (hourly/daily)
+        * Y-axis: Event frequency
+        * Event types: Admissions, discharges, procedures
+    - Common Query Terms:
+        * "events", "occurrences", "incidents"
+        * "trends", "patterns", "frequency"
+        * "time", "temporal", "periodic"
 
-    2. Graph Interaction Instructions:
-    - Filter Options:
-        * Gender selection (All, Male, Female)
-        * Age group selection
-        * Ethnicity selection
-        * Time period selection
-    - Hover Effects:
-        * Detailed tooltips with exact values
-        * Percentage distributions
-        * Comparative statistics
-    - Export Options:
-        * Download data as CSV
-        * Save graph as image
-        * Generate detailed reports
+    2. Data Relationships and Cross-References:
+    
+    a) Demographic Correlations:
+    - Age vs Ethnicity patterns
+    - Gender distribution across categories
+    - Cultural factors in healthcare access
+    - Socioeconomic implications
+    
+    b) Healthcare Issue Patterns:
+    - Communication barriers across demographics
+    - Transport issues by location and age
+    - Diagnosis delays by ethnic group
+    - Access problems by age group
+    
+    c) Temporal Patterns:
+    - Daily admission variations
+    - Weekly trend analysis
+    - Seasonal healthcare patterns
+    - Peak period identification
 
-    3. Graph Insights and Analysis:
-    
-    a) Subcategory-Ethnicity Patterns:
-    - Communication barriers more prevalent in certain ethnic groups
-    - Transport issues showing demographic correlations
-    - Healthcare access variations across ethnicities
-    
-    b) Age-Related Trends:
-    - Different health issues predominant in specific age groups
-    - Age-specific service utilization patterns
-    - Impact of age on healthcare access
-    
-    c) Feedback Patterns:
-    - Most common categories of feedback
-    - Demographic-specific concerns
-    - Temporal trends in patient satisfaction
-    
-    d) Event Distribution:
-    - Peak admission hours and days
-    - Department-specific busy periods
-    - Resource utilization patterns
+    3. Common Analysis Scenarios:
 
-    4. Navigation Commands:
-    - "Show graph [type]": Opens specific graph view
-    - "Compare [metric1] vs [metric2]": Shows comparative analysis
-    - "Filter by [criterion]": Applies specific filters
-    - "Navigate to [dashboard]": Opens specific dashboard
-    - "Analyze trends in [category]": Shows trend analysis
+    a) Demographic Analysis:
+    - "Show me problems faced by elderly patients"
+    - "Compare issues between ethnic groups"
+    - "Analyze age-related healthcare patterns"
+    - "Distribution of complaints by race"
     
-    5. Advanced Analysis Features:
-    - Cross-reference multiple graphs
-    - Demographic correlation analysis
-    - Time-based pattern recognition
-    - Predictive trend analysis
+    b) Issue-based Analysis:
+    - "Transport problems across age groups"
+    - "Communication barriers by ethnicity"
+    - "Diagnosis delays in different communities"
+    - "Access issues for minority groups"
+    
+    c) Trend Analysis:
+    - "Hospital admission patterns"
+    - "Weekly event distribution"
+    - "Busiest hours for procedures"
+    - "Patient discharge trends"
+
+    4. Healthcare Insights by Category:
+
+    a) Communication Barriers:
+    - Language-based issues
+    - Cultural misunderstandings
+    - Information delivery problems
+    - Patient-provider communication gaps
+    
+    b) Transport Issues:
+    - Geographic accessibility
+    - Public transport dependence
+    - Emergency transport patterns
+    - Distance-related challenges
+    
+    c) Diagnosis Patterns:
+    - Delay factors analysis
+    - Demographic influences
+    - Cultural impact on diagnosis
+    - Access to specialist care
+    
+    d) Healthcare Access:
+    - Availability of services
+    - Insurance-related issues
+    - Appointment scheduling
+    - Resource distribution
 `;
 
 initializeVectorStore(medicalKnowledge).then(() => {
-    console.log('RAG system initialized with comprehensive graph knowledge and navigation capabilities');
+    console.log('RAG system initialized with enhanced knowledge base and query handling');
 }).catch(console.error);
 
 // RAG query endpoint
