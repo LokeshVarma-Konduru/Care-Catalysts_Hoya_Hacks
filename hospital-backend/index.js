@@ -169,8 +169,13 @@ app.post('/api/chat/rag', async (req, res) => {
 
 // MongoDB Connection
 mongoose.connect('mongodb+srv://akhilandresleo:Akhil%402002@patientdata.tesqt.mongodb.net/hospital_db?retryWrites=true&w=majority', {
+<<<<<<< HEAD
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+=======
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000
+>>>>>>> a3014fa7acd6593e573ddc5bee1ea51a09e73d3a
 }).then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("MongoDB Connection Error: ", err));
 
@@ -184,10 +189,12 @@ const Event = mongoose.model('Event', EventSchema);
 
 // Updated Feedback Schema
 const FeedbackSchema = new mongoose.Schema({
+  patient_id: String,
   Patient_Name: String,
   Age: Number,
   Sex: {
     type: String,
+    required: true,
     enum: ['Male', 'Female']
   },
   Ethnicity: {
@@ -351,13 +358,17 @@ app.get('/api/feedback/subcategory-ethnicity', async (req, res) => {
 // Endpoint to get age range vs subcategory analysis
 app.get('/api/feedback/age-subcategory', async (req, res) => {
   try {
-    const { subcategory } = req.query;
-    console.log('Requested subcategory:', subcategory);
+    const { subcategory, sex } = req.query;
+    console.log('Requested subcategory:', subcategory, 'sex:', sex);
 
     // Build match query
-    const matchQuery = subcategory && subcategory !== 'all' 
-      ? { Subcategory: subcategory }
-      : {};
+    const matchQuery = {};
+    if (subcategory && subcategory !== 'all') {
+      matchQuery.Subcategory = subcategory;
+    }
+    if (sex && sex !== 'all') {
+      matchQuery.Sex = sex;
+    }
 
     // First, get all distinct subcategories if none specified
     let subcategories = [];
@@ -369,7 +380,7 @@ app.get('/api/feedback/age-subcategory', async (req, res) => {
 
     // Get age distribution for each subcategory
     const result = await Feedback.aggregate([
-      // Initial match to filter by subcategory if specified
+      // Initial match to filter by subcategory and sex if specified
       { $match: matchQuery },
       
       // Create age range categories
@@ -394,7 +405,8 @@ app.get('/api/feedback/age-subcategory', async (req, res) => {
         $group: {
           _id: {
             subcategory: '$Subcategory',
-            ageRange: '$ageRange'
+            ageRange: '$ageRange',
+            sex: '$Sex'
           },
           count: { $sum: 1 }
         }
@@ -404,7 +416,8 @@ app.get('/api/feedback/age-subcategory', async (req, res) => {
       {
         $sort: {
           '_id.subcategory': 1,
-          '_id.ageRange': 1
+          '_id.ageRange': 1,
+          '_id.sex': 1
         }
       }
     ]);
@@ -414,13 +427,15 @@ app.get('/api/feedback/age-subcategory', async (req, res) => {
     const formattedData = subcategories.map(subcat => ({
       subcategory: subcat,
       ageData: ageRanges.map(range => {
-        const dataPoint = result.find(r => 
+        const dataPoints = result.filter(r => 
           r._id.subcategory === subcat && 
           r._id.ageRange === range
         );
+        
+        const count = dataPoints.reduce((sum, point) => sum + point.count, 0);
         return {
           ageRange: range,
-          count: dataPoint ? dataPoint.count : 0
+          count: count
         };
       })
     }));
@@ -490,6 +505,17 @@ app.get('/api/feedback/options', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+// Define the schemas
+const PatientSchema = new mongoose.Schema({
+  patient_id: { type: String, unique: true },
+  name: String,
+  age: Number,
+  gender: String,
+});
+
+const Patient = mongoose.model('Patient', PatientSchema);
 
 // Start Server
 const PORT = 5000;

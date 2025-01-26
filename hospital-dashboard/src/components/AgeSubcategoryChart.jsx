@@ -26,18 +26,22 @@ const AgeSubcategoryChart = () => {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
+  const [selectedSex, setSelectedSex] = useState('all');
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [selectedSubcategory]);
+  }, [selectedSubcategory, selectedSex]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get('http://localhost:5000/api/feedback/age-subcategory', {
-        params: { subcategory: selectedSubcategory }
+        params: { 
+          subcategory: selectedSubcategory,
+          sex: selectedSex
+        }
       });
       
       const colors = [
@@ -132,7 +136,7 @@ const AgeSubcategoryChart = () => {
 
   return (
     <Box sx={{ height: '100%', p: 3 }}>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Subcategory Filter</InputLabel>
           <Select
@@ -146,6 +150,19 @@ const AgeSubcategoryChart = () => {
             <MenuItem value="Postpartum Infections">Postpartum Infections</MenuItem>
             <MenuItem value="Frequent Visits">Frequent Visits</MenuItem>
             <MenuItem value="Transport Issues">Transport Issues</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Sex</InputLabel>
+          <Select
+            value={selectedSex}
+            label="Sex"
+            onChange={(e) => setSelectedSex(e.target.value)}
+          >
+            <MenuItem value="all">All</MenuItem>
+            <MenuItem value="Male">Male</MenuItem>
+            <MenuItem value="Female">Female</MenuItem>
           </Select>
         </FormControl>
       </Box>
