@@ -5,16 +5,139 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+// Add these routes to your existing index.js
+const { initializeVectorStore, queryRAG } = require('./rag');
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
+// Initialize RAG with medical knowledge
+const medicalKnowledge = `
+    Medical Knowledge Base and Data Insights:
+    
+    1. Available Graphs and Navigation:
+
+    a) Subcategory vs Ethnicity Chart (Path: /subcategory-ethnicity):
+    - Shows distribution of healthcare issues across different ethnic groups
+    - Interactive filters for gender selection
+    - Color-coded bars for easy comparison
+    - Features:
+        * X-axis: Healthcare subcategories
+        * Y-axis: Number of cases
+        * Multiple ethnic groups displayed side by side
+        * Filterable by gender (All, Male, Female)
+    - Navigation: "Show me the subcategory vs ethnicity graph" or "Navigate to ethnicity distribution"
+    
+    b) Age vs Subcategory Chart (Path: /age-subcategory):
+    - Visualizes healthcare issues across different age groups
+    - Interactive subcategory selection
+    - Age groups in ranges (18-30, 31-45, 46-60, 61+)
+    - Features:
+        * X-axis: Age groups
+        * Y-axis: Number of cases
+        * Color-coded bars for different subcategories
+        * Filterable by specific subcategory
+    - Navigation: "Show me the age distribution graph" or "Navigate to age analysis"
+    
+    c) Feedback Analysis Dashboard (Path: /feedback):
+    - Overall distribution of feedback categories
+    - Ethnicity-specific analysis
+    - Trend analysis over time
+    - Features:
+        * Category distribution pie chart
+        * Time-series trend analysis
+        * Ethnicity-wise breakdown
+    - Navigation: "Show me the feedback analysis" or "Open feedback dashboard"
+    
+    d) Event Trends Chart (Path: /events):
+    - Hospital event patterns and timing analysis
+    - Hourly and daily trend visualization
+    - Features:
+        * Time-based event distribution
+        * Peak hours identification
+        * Weekly patterns
+        * Admission and discharge trends
+    - Navigation: "Show me hospital event trends" or "View event analysis"
+
+    2. Graph Interaction Instructions:
+    - Filter Options:
+        * Gender selection (All, Male, Female)
+        * Age group selection
+        * Ethnicity selection
+        * Time period selection
+    - Hover Effects:
+        * Detailed tooltips with exact values
+        * Percentage distributions
+        * Comparative statistics
+    - Export Options:
+        * Download data as CSV
+        * Save graph as image
+        * Generate detailed reports
+
+    3. Graph Insights and Analysis:
+    
+    a) Subcategory-Ethnicity Patterns:
+    - Communication barriers more prevalent in certain ethnic groups
+    - Transport issues showing demographic correlations
+    - Healthcare access variations across ethnicities
+    
+    b) Age-Related Trends:
+    - Different health issues predominant in specific age groups
+    - Age-specific service utilization patterns
+    - Impact of age on healthcare access
+    
+    c) Feedback Patterns:
+    - Most common categories of feedback
+    - Demographic-specific concerns
+    - Temporal trends in patient satisfaction
+    
+    d) Event Distribution:
+    - Peak admission hours and days
+    - Department-specific busy periods
+    - Resource utilization patterns
+
+    4. Navigation Commands:
+    - "Show graph [type]": Opens specific graph view
+    - "Compare [metric1] vs [metric2]": Shows comparative analysis
+    - "Filter by [criterion]": Applies specific filters
+    - "Navigate to [dashboard]": Opens specific dashboard
+    - "Analyze trends in [category]": Shows trend analysis
+    
+    5. Advanced Analysis Features:
+    - Cross-reference multiple graphs
+    - Demographic correlation analysis
+    - Time-based pattern recognition
+    - Predictive trend analysis
+`;
+
+initializeVectorStore(medicalKnowledge).then(() => {
+    console.log('RAG system initialized with comprehensive graph knowledge and navigation capabilities');
+}).catch(console.error);
+
+// RAG query endpoint
+app.post('/api/chat/rag', async (req, res) => {
+    try {
+        const { question } = req.body;
+        const answer = await queryRAG(question);
+        res.json({ answer });
+    } catch (error) {
+        console.error('RAG Error:', error);
+        res.status(500).json({ error: 'Error processing your question' });
+    }
+});
+
 // MongoDB Connection
 mongoose.connect('mongodb+srv://akhilandresleo:Akhil%402002@patientdata.tesqt.mongodb.net/hospital_db?retryWrites=true&w=majority', {
+<<<<<<< HEAD
   useNewUrlParser: true,
   useUnifiedTopology: true,
+=======
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000
+>>>>>>> a3014fa7acd6593e573ddc5bee1ea51a09e73d3a
 }).then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("MongoDB Connection Error: ", err));
 
