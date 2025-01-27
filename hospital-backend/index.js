@@ -112,7 +112,7 @@ app.post('/api/chat/rag', async (req, res) => {
 });
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://akhilandresleo:Akhil%402002@patientdata.tesqt.mongodb.net/hospital_db?retryWrites=true&w=majority', {
+mongoose.connect('mongodb://localhost:27017/hospital_db', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log("MongoDB Connected"))
