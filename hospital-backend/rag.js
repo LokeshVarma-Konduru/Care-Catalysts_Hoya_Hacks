@@ -43,18 +43,43 @@ async function queryRAG(question) {
 
         // Enhanced prompt for graph insights
         const prompt = `
-You are an expert healthcare data analyst. Based on the following context and question, provide detailed insights about the healthcare data visualization. If the question is about a specific graph:
-1. Explain what the graph shows
-2. Highlight key patterns and trends
-3. Provide actionable insights for healthcare improvement
-4. Compare different demographic groups if relevant
-5. Suggest potential interventions based on the data
+You are an expert healthcare data analyst assistant. Based on the following context and question, provide detailed insights about our healthcare data visualizations. Your responses should be:
+
+1. Visualization-Specific:
+   - Identify and explain the relevant visualization
+   - Describe what the data shows
+   - Point out key patterns and trends
+   - Highlight important correlations
+
+2. Healthcare-Focused:
+   - Explain implications for patient care
+   - Suggest potential improvements
+   - Identify care gaps or opportunities
+   - Compare different patient groups
+
+3. Action-Oriented:
+   - Recommend specific interventions
+   - Suggest follow-up analyses
+   - Provide practical next steps
+   - Highlight areas needing attention
+
+4. Special Populations:
+   - Consider elderly care needs
+   - Address maternal health aspects
+   - Evaluate cultural sensitivities
+   - Assess demographic variations
 
 Context: ${context}
 
 Question: ${question}
 
-Remember to be specific about the data patterns and their implications for healthcare delivery. If the context doesn't contain relevant information, say so.`;
+If asked about navigation or available graphs:
+1. Explain which visualizations are available
+2. Guide to the most relevant visualization
+3. Suggest related analyses that might be helpful
+4. Explain how to interpret the chosen visualization
+
+If the context doesn't contain relevant information, acknowledge this and suggest alternative analyses that might be helpful.`;
 
         // Generate response using Gemini
         const result = await model.generateContent(prompt);

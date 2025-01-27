@@ -50,7 +50,13 @@ const Dashboard = ({ activeGraph }) => {
     <Box sx={{
       height: '100%',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'auto',
+      '& > *': {  
+        minHeight: '600px',  
+        flex: '1 1 auto',
+        p: 2,  
+      }
     }}>
       {renderGraph()}
     </Box>

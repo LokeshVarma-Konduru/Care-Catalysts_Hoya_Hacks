@@ -12,7 +12,8 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
-  Box
+  Box,
+  Container
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -42,31 +43,35 @@ const Navbar = () => {
   };
 
   const drawer = (
-    <List>
+    <List sx={{ mt: 1 }}>
       {menuItems.map((item) => (
         <ListItem
           button
           component={Link}
           to={item.path}
           key={item.text}
-          onClick={handleDrawerToggle}
+          selected={isActive(item.path)}
           sx={{
-            backgroundColor: isActive(item.path) ? 'rgba(33, 150, 243, 0.08)' : 'transparent',
-            '&:hover': {
-              backgroundColor: 'rgba(33, 150, 243, 0.12)',
-            }
+            mx: 1,
+            borderRadius: 1,
+            '&.Mui-selected': {
+              backgroundColor: 'primary.light',
+              '&:hover': {
+                backgroundColor: 'primary.light',
+              },
+            },
           }}
         >
-          <ListItemIcon sx={{ color: isActive(item.path) ? '#2196f3' : 'inherit' }}>
+          <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.main' : 'inherit' }}>
             {item.icon}
           </ListItemIcon>
           <ListItemText 
             primary={item.text}
-            sx={{ 
-              color: isActive(item.path) ? '#2196f3' : 'inherit',
-              '& .MuiTypography-root': {
-                fontWeight: isActive(item.path) ? 600 : 400
-              }
+            sx={{
+              color: isActive(item.path) ? 'primary.main' : 'inherit',
+              '& .MuiListItemText-primary': {
+                fontWeight: isActive(item.path) ? 600 : 400,
+              },
             }}
           />
         </ListItem>
@@ -75,12 +80,30 @@ const Navbar = () => {
   );
 
   return (
-    <>
-      <AppBar position="fixed" sx={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        <Toolbar>
+    <AppBar 
+      position="sticky" 
+      sx={{ 
+        backgroundColor: 'background.paper',
+        color: 'text.primary',
+      }}
+    >
+      <Container 
+        maxWidth="xl" 
+        sx={{ 
+          maxWidth: '1800px !important',
+          px: { xs: 2, sm: 3, md: 4 }
+        }}
+      >
+        <Toolbar 
+          disableGutters 
+          sx={{ 
+            minHeight: { xs: '64px', sm: '70px' },
+            py: 1
+          }}
+        >
           {isMobile && (
             <IconButton
-              color="primary"
+              color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
@@ -89,39 +112,45 @@ const Navbar = () => {
               <MenuIcon />
             </IconButton>
           )}
-          
-          <HospitalIcon sx={{ color: '#2196f3', mr: 1 }} />
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
-              flexGrow: 1,
-              color: '#2196f3',
-              fontWeight: 600,
-              letterSpacing: '0.5px'
-            }}
-          >
-            Hospital Dashboard
-          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <HospitalIcon sx={{ display: 'flex', mr: 1, color: 'primary.main' }} />
+            <Typography
+              variant="h6"
+              noWrap
+              component={Link}
+              to="/"
+              sx={{
+                fontWeight: 700,
+                color: 'inherit',
+                textDecoration: 'none',
+                '&:hover': {
+                  color: 'primary.main',
+                },
+              }}
+            >
+              Care Catalysts
+            </Typography>
+          </Box>
 
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2,
+              ml: 'auto' 
+            }}>
               {menuItems.map((item) => (
                 <Button
                   key={item.text}
                   component={Link}
                   to={item.path}
                   startIcon={item.icon}
+                  color={isActive(item.path) ? 'primary' : 'inherit'}
                   sx={{
-                    color: isActive(item.path) ? '#2196f3' : '#666',
-                    backgroundColor: isActive(item.path) ? 'rgba(33, 150, 243, 0.08)' : 'transparent',
-                    fontWeight: isActive(item.path) ? 600 : 500,
+                    fontWeight: isActive(item.path) ? 600 : 400,
                     '&:hover': {
-                      backgroundColor: 'rgba(33, 150, 243, 0.12)',
+                      backgroundColor: 'rgba(33, 150, 243, 0.08)',
                     },
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    padding: '8px 16px',
                   }}
                 >
                   {item.text}
@@ -130,7 +159,7 @@ const Navbar = () => {
             </Box>
           )}
         </Toolbar>
-      </AppBar>
+      </Container>
 
       <Drawer
         variant="temporary"
@@ -138,23 +167,20 @@ const Navbar = () => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true // Better mobile performance
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', sm: 'none' },
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
             width: 240,
-            backgroundColor: 'white'
+            backgroundColor: 'background.paper',
           },
         }}
       >
         {drawer}
       </Drawer>
-
-      {/* Toolbar spacer */}
-      <Toolbar />
-    </>
+    </AppBar>
   );
 };
 

@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 // Add these routes to your existing index.js
 const { initializeVectorStore, queryRAG } = require('./rag');
@@ -20,97 +21,79 @@ const medicalKnowledge = `
     
     1. Available Graphs and Navigation:
 
-    a) Subcategory vs Ethnicity Chart (Path: /subcategory-ethnicity):
-    - Shows distribution of healthcare issues across different ethnic groups
-    - Interactive filters for gender selection
-    - Color-coded bars for easy comparison
-    - Features:
-        * X-axis: Healthcare subcategories
-        * Y-axis: Number of cases
-        * Multiple ethnic groups displayed side by side
-        * Filterable by gender (All, Male, Female)
-    - Navigation: "Show me the subcategory vs ethnicity graph" or "Navigate to ethnicity distribution"
+    a) Subcategory vs Ethnicity Analysis (Paths: /subcategory-ethnicity, /ethnicity-subcategory, /ethnic-distribution):
+    - Visualization Type: Bar chart comparing healthcare issues across ethnic groups
+    - Key Variables: Healthcare subcategories by ethnic groups
+    - Common Query Terms: ethnicity, race, cultural background, distribution
     
-    b) Age vs Subcategory Chart (Path: /age-subcategory):
-    - Visualizes healthcare issues across different age groups
-    - Interactive subcategory selection
-    - Age groups in ranges (18-30, 31-45, 46-60, 61+)
-    - Features:
-        * X-axis: Age groups
-        * Y-axis: Number of cases
-        * Color-coded bars for different subcategories
-        * Filterable by specific subcategory
-    - Navigation: "Show me the age distribution graph" or "Navigate to age analysis"
+    b) Age Group Analysis (Paths: /age-subcategory, /age-distribution):
+    - Visualization Type: Bar chart showing healthcare issues by age groups
+    - Key Variables: Age groups (18-30, 31-45, 46-60, 61+)
+    - Common Query Terms: age, years, elderly, young, distribution
     
-    c) Feedback Analysis Dashboard (Path: /feedback):
-    - Overall distribution of feedback categories
-    - Ethnicity-specific analysis
-    - Trend analysis over time
-    - Features:
-        * Category distribution pie chart
-        * Time-series trend analysis
-        * Ethnicity-wise breakdown
-    - Navigation: "Show me the feedback analysis" or "Open feedback dashboard"
+    c) Feedback Impact Analysis (Paths: /feedback-impact, /impact-analysis):
+    - Visualization Type: Line chart comparing before/after feedback implementation
+    - Key Variables: Event counts, dates, feedback metrics
+    - Common Query Terms: impact, improvement, changes, effectiveness
     
-    d) Event Trends Chart (Path: /events):
-    - Hospital event patterns and timing analysis
-    - Hourly and daily trend visualization
-    - Features:
-        * Time-based event distribution
-        * Peak hours identification
-        * Weekly patterns
-        * Admission and discharge trends
-    - Navigation: "Show me hospital event trends" or "View event analysis"
-
-    2. Graph Interaction Instructions:
-    - Filter Options:
-        * Gender selection (All, Male, Female)
-        * Age group selection
-        * Ethnicity selection
-        * Time period selection
-    - Hover Effects:
-        * Detailed tooltips with exact values
-        * Percentage distributions
-        * Comparative statistics
-    - Export Options:
-        * Download data as CSV
-        * Save graph as image
-        * Generate detailed reports
-
-    3. Graph Insights and Analysis:
+    d) Sentiment Analysis (Paths: /sentiment, /sentiment-analysis):
+    - Visualization Type: Multi-chart sentiment distribution
+    - Key Variables: Sentiment scores, feedback categories
+    - Common Query Terms: sentiment, opinion, satisfaction, feelings
     
-    a) Subcategory-Ethnicity Patterns:
-    - Communication barriers more prevalent in certain ethnic groups
-    - Transport issues showing demographic correlations
-    - Healthcare access variations across ethnicities
+    e) Elderly Visits Analysis (Paths: /elderly-visits, /senior-care):
+    - Visualization Type: Time series of elderly patient visits
+    - Key Variables: Visit frequency, temporal patterns
+    - Common Query Terms: elderly care, senior visits, geriatric
     
-    b) Age-Related Trends:
-    - Different health issues predominant in specific age groups
-    - Age-specific service utilization patterns
-    - Impact of age on healthcare access
+    f) Pregnancy Care Analysis (Paths: /pregnant-visits, /maternity):
+    - Visualization Type: Time series of pregnancy-related visits
+    - Key Variables: Visit patterns, maternal care metrics
+    - Common Query Terms: pregnancy, maternal, prenatal care
     
-    c) Feedback Patterns:
-    - Most common categories of feedback
-    - Demographic-specific concerns
-    - Temporal trends in patient satisfaction
+    g) Final Results Dashboard (Paths: /final-results, /overall-analysis):
+    - Visualization Type: Comprehensive analysis dashboard
+    - Key Variables: Multiple metrics, overall impact
+    - Common Query Terms: results, outcomes, final analysis
     
-    d) Event Distribution:
-    - Peak admission hours and days
-    - Department-specific busy periods
-    - Resource utilization patterns
-
-    4. Navigation Commands:
-    - "Show graph [type]": Opens specific graph view
-    - "Compare [metric1] vs [metric2]": Shows comparative analysis
-    - "Filter by [criterion]": Applies specific filters
-    - "Navigate to [dashboard]": Opens specific dashboard
-    - "Analyze trends in [category]": Shows trend analysis
+    2. Data Relationships and Insights:
     
-    5. Advanced Analysis Features:
-    - Cross-reference multiple graphs
-    - Demographic correlation analysis
-    - Time-based pattern recognition
-    - Predictive trend analysis
+    a) Demographic Patterns:
+    - Age vs Ethnicity correlations
+    - Gender distribution in different care types
+    - Cultural factors affecting care access
+    
+    b) Care Quality Metrics:
+    - Patient satisfaction trends
+    - Care delivery improvements
+    - Feedback implementation impact
+    
+    c) Special Population Care:
+    - Elderly care patterns and needs
+    - Maternal care effectiveness
+    - Cultural sensitivity in care delivery
+    
+    d) Temporal Analysis:
+    - Visit frequency patterns
+    - Seasonal variations in care needs
+    - Implementation impact over time
+    
+    3. Key Healthcare Insights:
+    
+    a) Patient Experience:
+    - Feedback categories and trends
+    - Satisfaction metrics
+    - Communication effectiveness
+    
+    b) Care Delivery:
+    - Access patterns
+    - Service efficiency
+    - Quality improvements
+    
+    c) Population Health:
+    - Demographic-specific needs
+    - Care gap identification
+    - Intervention effectiveness
 `;
 
 initializeVectorStore(medicalKnowledge).then(() => {
@@ -129,12 +112,15 @@ app.post('/api/chat/rag', async (req, res) => {
     }
 });
 
-// MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/hospital_db', {
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+}).then(() => {
+  console.log('Connected to MongoDB successfully');
+}).catch((error) => {
+  console.error('MongoDB connection error:', error);
+});
 
 // Schema and Model
 const EventSchema = new mongoose.Schema({
@@ -573,33 +559,29 @@ app.get('/api/analysis/admission-issues', async (req, res) => {
       },
       {
         $group: {
-          _id: '$_id.admitted_for',
-          issues: {
+          _id: {
+            category: "$_id.category",
+            subcategory: "$_id.subcategory",
+            age_group: "$_id.age_group",
+            sex: "$_id.sex"
+          },
+          admitted_for: {
             $push: {
-              category: '$_id.category',
-              subcategory: '$_id.subcategory',
-              age_group: '$_id.age_group',
-              sex: '$_id.sex',
-              count: '$count',
-              unique_patients: { $size: '$patients' }
+              reason: "$_id.admitted_for",
+              count: "$count"
             }
           },
-          total_issues: { $sum: '$count' }
+          total_issues: { $sum: "$count" }
         }
       },
       {
         $project: {
-          admitted_for: '$_id',
-          issues: 1,
+          category: '$_id.category',
+          subcategory: '$_id.subcategory',
+          age_group: '$_id.age_group',
+          sex: '$_id.sex',
+          admitted_for: 1,
           total_issues: 1,
-          most_common_issues: {
-            $slice: [{
-              $sortArray: {
-                input: '$issues',
-                sortBy: { count: -1 }
-              }
-            }, 3]
-          },
           _id: 0
         }
       },
@@ -613,12 +595,12 @@ app.get('/api/analysis/admission-issues', async (req, res) => {
       total_records: result.reduce((sum, r) => sum + r.total_issues, 0),
       admission_types: result.length,
       top_issues: result.slice(0, 3).map(r => ({
-        admitted_for: r.admitted_for,
+        category: r.category,
+        subcategory: r.subcategory,
         total_issues: r.total_issues,
-        main_problems: r.most_common_issues.map(i => ({
-          subcategory: i.subcategory,
-          count: i.count,
-          demographic: `${i.age_group} / ${i.sex}`
+        main_problems: r.admitted_for.map(i => ({
+          reason: i.reason,
+          count: i.count
         }))
       }))
     };

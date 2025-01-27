@@ -95,13 +95,28 @@ const FeedbackImpactChart = () => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          padding: 20,
+          font: {
+            size: 12
+          }
+        }
       },
       title: {
         display: true,
         text: 'Impact of Feedback Implementation',
+        font: {
+          size: 16,
+          weight: 'bold'
+        },
+        padding: {
+          top: 10,
+          bottom: 20
+        }
       },
     },
     scales: {
@@ -109,14 +124,47 @@ const FeedbackImpactChart = () => {
         type: 'category',
         title: {
           display: true,
-          text: 'Date'
+          text: 'Date',
+          font: {
+            size: 14
+          },
+          padding: {
+            top: 10
+          }
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          padding: 10,
+          font: {
+            size: 12
+          }
         }
       },
       y: {
         title: {
           display: true,
-          text: 'Number of Events'
+          text: 'Number of Events',
+          font: {
+            size: 14
+          },
+          padding: {
+            bottom: 10
+          }
+        },
+        ticks: {
+          font: {
+            size: 12
+          }
         }
+      }
+    },
+    layout: {
+      padding: {
+        left: 15,
+        right: 15,
+        top: 15,
+        bottom: 15
       }
     }
   };

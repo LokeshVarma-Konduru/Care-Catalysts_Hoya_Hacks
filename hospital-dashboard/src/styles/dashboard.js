@@ -2,15 +2,21 @@ export const dashboardStyles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f5f5f5',
-    paddingTop: '64px', // Height of the navbar
+    padding: '0',
+    margin: '0',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   mainContent: {
-    padding: '2rem',
-    maxWidth: '1200px',
-    margin: '0 auto',
+    padding: '1.5rem',
+    width: '100%',
+    margin: '0',
+    flex: 1,
   },
   section: {
     marginBottom: '2rem',
+    width: '100%',
   },
   sectionTitle: {
     fontSize: '1.5rem',
@@ -20,9 +26,11 @@ export const dashboardStyles = {
   },
   card: {
     backgroundColor: 'white',
-    borderRadius: '8px',
+    borderRadius: '12px',
     padding: '1.5rem',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    width: '100%',
+    margin: '0 auto',
   },
   filterContainer: {
     display: 'flex',
