@@ -1,12 +1,77 @@
-import React, { useState } from 'react';
-import { Box, Paper, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Paper, Typography, TextField, IconButton, CircularProgress, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ElderlyVisitsChart from './ElderlyVisitsChart';
 import PregnantVisitsChart from './PregnantVisitsChart';
 
 const Chatbot = ({ onGraphSelect }) => {
-  const [messages, setMessages] = useState([
-    {
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  // Initialize messages from localStorage or default if not found
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem('chatHistory');
+    return savedMessages ? JSON.parse(savedMessages) : [
+      {
+        text: "Hello! I can help you explore hospital data. Choose a category to begin:",
+        isBot: true,
+        options: [
+          { text: "Progress", value: "progress" },
+          { text: "Submit Feedback", value: "feedback_form" },
+          { text: "Ask Medical Questions", value: "medical" },
+          { text: "Results", value: "results" },
+          { text: "Start Analysis", value: "start_analysis" }
+        ]
+      }
+    ];
+  });
+
+  const [input, setInput] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return localStorage.getItem('selectedCategory') || null;
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedAnalysis, setSelectedAnalysis] = useState(() => {
+    return localStorage.getItem('selectedAnalysis') === 'true';
+  });
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+  }, [messages]);
+
+  // Save selected category and analysis state
+  useEffect(() => {
+    localStorage.setItem('selectedCategory', selectedCategory || '');
+    localStorage.setItem('selectedAnalysis', selectedAnalysis.toString());
+  }, [selectedCategory, selectedAnalysis]);
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  };
+
+  // Auto scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Prevent automatic scroll up when chat container is manually scrolled
+  const handleScroll = (e) => {
+    const element = e.target;
+    const isScrolledNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
+    if (isScrolledNearBottom) {
+      element.dataset.allowAutoScroll = 'true';
+    } else {
+      element.dataset.allowAutoScroll = 'false';
+    }
+  };
+
+  // Clear chat history function
+  const clearChatHistory = () => {
+    setMessages([{
       text: "Hello! I can help you explore hospital data. Choose a category to begin:",
       isBot: true,
       options: [
@@ -16,18 +81,18 @@ const Chatbot = ({ onGraphSelect }) => {
         { text: "Results", value: "results" },
         { text: "Start Analysis", value: "start_analysis" }
       ]
-    }
-  ]);
-  const [input, setInput] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedAnalysis, setSelectedAnalysis] = useState(false);
+    }]);
+    setSelectedCategory(null);
+    setSelectedAnalysis(false);
+    localStorage.removeItem('chatHistory');
+    localStorage.removeItem('selectedCategory');
+    localStorage.removeItem('selectedAnalysis');
+  };
 
   const analysisOptions = [
-    { text: "Epic Data Analysis", value: "epic" },
-    { text: "Patient Feedback Analysis", value: "feedback" },
-    { text: "Combined Analysis", value: "epic_feedback" },
-    { text: "Special Population Analysis", value: "special_population" }
+    { text: "Epic Data", value: "epic" },
+    { text: "Patient Feedback Data", value: "feedback" },
+    { text: "Epic + Feedback Analysis", value: "epic_feedback" }
   ];
 
   const resultOptions = [
@@ -89,9 +154,7 @@ const Chatbot = ({ onGraphSelect }) => {
           isBot: true,
           options: [
             { text: "Show Admission Issues Analysis", value: "admission_issues" },
-            { text: "Show Admission vs Subcategory Analysis", value: "admission_subcategories" },
-            { text: "Show Ethnicity Distribution", value: "ethnicity_distribution" },
-            { text: "Show Age Distribution", value: "age_distribution" }
+            { text: "Show Admission vs Subcategory Analysis", value: "admission_subcategories" }
           ]
         }
       ]);
@@ -101,7 +164,7 @@ const Chatbot = ({ onGraphSelect }) => {
     if (value === 'epic') {
       setMessages([
         ...messages,
-        { text: "Epic Data Analysis", isBot: false },
+        { text: "Epic Data", isBot: false },
         {
           text: "What would you like to analyze?",
           isBot: true,
@@ -114,7 +177,7 @@ const Chatbot = ({ onGraphSelect }) => {
     } else if (value === 'feedback') {
       setMessages([
         ...messages,
-        { text: "Patient Feedback Analysis", isBot: false },
+        { text: "Patient Feedback Data", isBot: false },
         {
           text: "What would you like to analyze?",
           isBot: true,
@@ -313,76 +376,100 @@ const Chatbot = ({ onGraphSelect }) => {
   };
 
   return (
-    <Box sx={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: 'background.paper'
-    }}>
-      {/* Header */}
-      <Box sx={{
-        p: 2,
-        borderBottom: 1,
-        borderColor: 'divider',
-        backgroundColor: 'primary.main',
-        color: 'white'
+    <Paper 
+      elevation={3} 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative'
+      }}
+    >
+      {/* Header with clear button */}
+      <Box sx={{ 
+        p: 2, 
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        backgroundColor: 'background.paper',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
       }}>
-        <Typography variant="h6">
+        <Typography variant="h6" component="h2">
           Hospital Data Assistant
         </Typography>
+        <Button 
+          onClick={clearChatHistory}
+          size="small"
+          variant="outlined"
+          color="primary"
+          sx={{ 
+            minWidth: 'auto',
+            px: 2,
+            py: 0.5,
+            fontSize: '0.875rem',
+            '&:hover': {
+              color: 'error.main',
+              borderColor: 'error.main'
+            }
+          }}
+        >
+          Clear Chat
+        </Button>
       </Box>
 
-      {/* Messages */}
-      <Box sx={{
-        flex: 1,
-        overflow: 'auto',
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2
-      }}>
+      {/* Chat messages */}
+      <Box 
+        ref={chatContainerRef}
+        onScroll={handleScroll}
+        sx={{ 
+          flex: 1, 
+          overflow: 'auto', 
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
         {messages.map((message, index) => (
           <Box
             key={index}
             sx={{
               alignSelf: message.isBot ? 'flex-start' : 'flex-end',
-              maxWidth: '80%'
+              maxWidth: '80%',
+              backgroundColor: message.isBot ? 'grey.100' : 'primary.main',
+              color: message.isBot ? 'text.primary' : 'white',
+              borderRadius: 2,
+              p: 2,
             }}
           >
-            <Paper
-              elevation={1}
-              sx={{
-                p: 1.5,
-                backgroundColor: message.isBot ? 'grey.100' : 'primary.main',
-                color: message.isBot ? 'text.primary' : 'white',
-                borderRadius: 2
-              }}
-            >
-              <Typography>{message.text}</Typography>
-              {message.options && (
-                <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {message.options.map((option, optIndex) => (
-                    <Paper
-                      key={optIndex}
-                      onClick={() => handleOptionClick(option.value)}
-                      sx={{
-                        p: 1,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                          transform: 'translateX(4px)'
-                        }
-                      }}
-                    >
-                      <Typography>{option.text}</Typography>
-                    </Paper>
-                  ))}
-                </Box>
-              )}
-            </Paper>
+            <Typography>{message.text}</Typography>
+            {message.options && (
+              <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {message.options.map((option) => (
+                  <Button
+                    key={option.value}
+                    variant="contained"
+                    size="small"
+                    onClick={() => handleOptionClick(option.value)}
+                    sx={{
+                      backgroundColor: message.isBot ? 'white' : 'primary.light',
+                      color: message.isBot ? 'primary.main' : 'white',
+                      '&:hover': {
+                        backgroundColor: message.isBot ? 'grey.100' : 'primary.dark',
+                      },
+                    }}
+                  >
+                    {option.text}
+                  </Button>
+                ))}
+              </Box>
+            )}
           </Box>
         ))}
+        <div ref={messagesEndRef} />
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
             <CircularProgress size={24} />
@@ -396,8 +483,7 @@ const Chatbot = ({ onGraphSelect }) => {
         onSubmit={handleSubmit}
         sx={{
           p: 2,
-          borderTop: 1,
-          borderColor: 'divider',
+          borderTop: '1px solid rgba(0, 0, 0, 0.12)',
           backgroundColor: 'background.paper',
           display: 'flex',
           gap: 1
@@ -415,7 +501,7 @@ const Chatbot = ({ onGraphSelect }) => {
           <SendIcon />
         </IconButton>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

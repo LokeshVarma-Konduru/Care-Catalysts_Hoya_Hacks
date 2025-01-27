@@ -4,7 +4,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-require('dotenv').config();
 
 // Add these routes to your existing index.js
 const { initializeVectorStore, queryRAG } = require('./rag');
@@ -112,15 +111,12 @@ app.post('/api/chat/rag', async (req, res) => {
     }
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
+// MongoDB Connection
+mongoose.connect('mongodb+srv://akhilandresleo:Akhil%402002@patientdata.tesqt.mongodb.net/hospital_db?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => {
-  console.log('Connected to MongoDB successfully');
-}).catch((error) => {
-  console.error('MongoDB connection error:', error);
-});
+}).then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
 
 // Schema and Model
 const EventSchema = new mongoose.Schema({
@@ -559,29 +555,33 @@ app.get('/api/analysis/admission-issues', async (req, res) => {
       },
       {
         $group: {
-          _id: {
-            category: "$_id.category",
-            subcategory: "$_id.subcategory",
-            age_group: "$_id.age_group",
-            sex: "$_id.sex"
-          },
-          admitted_for: {
+          _id: '$_id.admitted_for',
+          issues: {
             $push: {
-              reason: "$_id.admitted_for",
-              count: "$count"
+              category: '$_id.category',
+              subcategory: '$_id.subcategory',
+              age_group: '$_id.age_group',
+              sex: '$_id.sex',
+              count: '$count',
+              unique_patients: { $size: '$patients' }
             }
           },
-          total_issues: { $sum: "$count" }
+          total_issues: { $sum: '$count' }
         }
       },
       {
         $project: {
-          category: '$_id.category',
-          subcategory: '$_id.subcategory',
-          age_group: '$_id.age_group',
-          sex: '$_id.sex',
-          admitted_for: 1,
+          admitted_for: '$_id',
+          issues: 1,
           total_issues: 1,
+          most_common_issues: {
+            $slice: [{
+              $sortArray: {
+                input: '$issues',
+                sortBy: { count: -1 }
+              }
+            }, 3]
+          },
           _id: 0
         }
       },
@@ -595,12 +595,12 @@ app.get('/api/analysis/admission-issues', async (req, res) => {
       total_records: result.reduce((sum, r) => sum + r.total_issues, 0),
       admission_types: result.length,
       top_issues: result.slice(0, 3).map(r => ({
-        category: r.category,
-        subcategory: r.subcategory,
+        admitted_for: r.admitted_for,
         total_issues: r.total_issues,
-        main_problems: r.admitted_for.map(i => ({
-          reason: i.reason,
-          count: i.count
+        main_problems: r.most_common_issues.map(i => ({
+          subcategory: i.subcategory,
+          count: i.count,
+          demographic: `${i.age_group} / ${i.sex}`
         }))
       }))
     };
